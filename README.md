@@ -1,16 +1,17 @@
 # urban_culture
 
-A new Flutter project.
+A platform where users can record their skincare routine. This does foster a sense of community among people, encourages them to support and motivate each other in maintaining healthy skincare habits. Users can maintain Streaks just like Snapchat, where in order to maintain the streaks users have to complete their routines daily and upload a picture of it. 
 
-## Getting Started
+Dependencies used: Firebase Auth, Cloud Firestore, Firebase Storage, Image Picker, FL chart and more.
+State management - Getx
 
-This project is a starting point for a Flutter application.
+How to Run the App (In Terminal): 
+1). git clone https://github.com/tikeshsahu/urban_culture.git
+2). Navigate to the Project directory 
+3). flutter clean 
+4). flutter pub get 
+5). flutter run
 
-A few resources to get you started if this is your first Flutter project:
+Feel free to reach out if any questions.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
