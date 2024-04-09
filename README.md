@@ -5,6 +5,10 @@ A platform where users can record their skincare routine. This does foster a sen
 Dependencies used: Firebase Auth, Cloud Firestore, Firebase Storage, Image Picker, FL chart and more.
 State management - Getx
 
+Dummy login credentials:
+Mobile number - 1111111111
+otp - 111111
+
 How to Run the App (In Terminal): 
 1). git clone https://github.com/tikeshsahu/urban_culture.git
 2). Navigate to the Project directory 
