@@ -32,14 +32,6 @@ class RoutineController extends GetxController {
     update();
   }
 
-  String convertTime(String date) {
-    DateTime time = DateTime.parse(date);
-    String period = (time.hour < 12) ? 'AM' : 'PM';
-    int hour = (time.hour > 12) ? time.hour - 12 : time.hour;
-    String minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
-  }
-
   Future<void> fetchDataAndUpdateIfNeeded(String userId) async {
     updateIsLoading(true);
     try {
@@ -76,7 +68,7 @@ class RoutineController extends GetxController {
   Future<void> uploadImageAndSaveRoutine(String userId, String routineId) async {
     try {
       updateIsFetchingImage(true);
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 0);
       if (pickedFile == null) {
         updateIsFetchingImage(false);
         return;
@@ -89,6 +81,7 @@ class RoutineController extends GetxController {
       Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
       List<dynamic> allRoutines = userData['allRoutines'];
       Map<String, dynamic> completedRoutines = userData['completedRoutines'];
+
       List routineIdsForToday = completedRoutines[DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()] ?? [];
       routineIdsForToday.add(routineId);
       completedRoutines[DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()] = routineIdsForToday;
@@ -124,11 +117,20 @@ class RoutineController extends GetxController {
   Future<String> uploadImage(File image, String userId, String routineId) async {
     try {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = FirebaseStorage.instance.ref().child('images').child(userId).child(routineId).child(fileName);
+      Reference ref = FirebaseStorage.instance.ref().child('images').child(userId).child(routineId).child(fileName);
       await ref.putFile(image);
-      return await ref.getDownloadURL();
+      var url = await ref.getDownloadURL();
+      return url;
     } catch (e) {
       return '';
     }
+  }
+
+  String convertTime(String date) {
+    DateTime time = DateTime.parse(date);
+    String period = (time.hour < 12) ? 'AM' : 'PM';
+    int hour = (time.hour > 12) ? time.hour - 12 : time.hour;
+    String minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute $period';
   }
 }
