@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,11 +8,16 @@ import 'package:urban_culture/utils/app_utils.dart';
 import 'package:urban_culture/utils/storage.dart';
 import 'package:intl/intl.dart';
 
-
 class RoutineController extends GetxController {
   final RxBool _isLoading = RxBool(false);
   final RxList _routineData = RxList([]);
   final RxBool _isFetchingImage = RxBool(false);
+  final Rx _titleController = Rx(TextEditingController());
+  final Rx _descriptionController = Rx(TextEditingController());
+  final Rx _formKey = Rx(GlobalKey<FormState>());
+  GlobalKey<FormState> get formKey => _formKey.value;
+  TextEditingController get titleController => _titleController.value;
+  TextEditingController get descriptionController => _descriptionController.value;
   bool get isLoading => _isLoading.value;
   List get routineData => _routineData;
   bool get isFetchingImage => _isFetchingImage.value;
@@ -20,6 +26,13 @@ class RoutineController extends GetxController {
   void onInit() {
     fetchDataAndUpdateIfNeeded(StorageService.instance.fetch(AppUtils.userId));
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.onClose();
   }
 
   updateIsLoading(bool value) {
@@ -33,6 +46,7 @@ class RoutineController extends GetxController {
   }
 
   Future<void> fetchDataAndUpdateIfNeeded(String userId) async {
+    print("fetchDataAndUpdateIfNeeded");
     updateIsLoading(true);
     try {
       String today = DateTime.now().toString().split(' ')[0];
@@ -40,10 +54,21 @@ class RoutineController extends GetxController {
       Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
       List allRoutines = userData['allRoutines'];
 
+      Reference ref = FirebaseStorage.instance.ref().child('images').child(userId);
+
+      // want to check if FirebaseStorage.instance.ref().child('images').child(userId) does not contain DateTime.now().toString().split(' ')[0] then
+      // delete the file inside .child(userId)
+      if (ref.child(DateTime.now().toString().split(' ')[0]) == null) {
+        print("ref delete");
+        ref.delete();
+      }
+
       if (userData['lastUpdatedDay'] != today) {
         List updatedRoutines = allRoutines.map((routine) {
           return {
             'routineId': routine['routineId'],
+            'routineTitle': 'Routine ${allRoutines.indexOf(routine) + 1}',
+            'routineDescription': 'Enter description',
             'completedDate': '',
             'isRoutineDone': false,
             'imagePath': '',
@@ -58,6 +83,7 @@ class RoutineController extends GetxController {
         _routineData.assignAll(allRoutines);
       }
     } catch (e) {
+      print(e);
       updateIsLoading(false);
       Get.snackbar("Error", "Something went wrong.");
     } finally {
@@ -65,7 +91,7 @@ class RoutineController extends GetxController {
     }
   }
 
-  Future<void> uploadImageAndSaveRoutine(String userId, String routineId) async {
+  Future<void> uploadImageAndSaveRoutine({required String userId, required String routineId, String routineTitle = '', String routineDescription = ''}) async {
     try {
       updateIsFetchingImage(true);
       final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera, imageQuality: 0);
@@ -90,6 +116,8 @@ class RoutineController extends GetxController {
         if (routine['routineId'] == routineId) {
           return {
             'routineId': routine['routineId'],
+            'routineTitle': routine['routineTitle'],
+            'routineDescription': routine['routineDescription'],
             'completedDate': DateTime.now().toString(),
             'isRoutineDone': true,
             'imagePath': imagePath,
@@ -109,7 +137,48 @@ class RoutineController extends GetxController {
       updateIsFetchingImage(false);
       onInit();
     } catch (e) {
+      print(e);
       updateIsFetchingImage(false);
+      Get.snackbar("Error", "Failed to save changes. Please try again.");
+    }
+  }
+
+  Future updateTitleAndDescription({required String userId, required String routineId, required String title, required String description}) async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+    updateIsLoading(true);
+
+    try {
+      print("updateTitleAndDescription");
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
+      List<dynamic> allRoutines = userData['allRoutines'];
+
+      List<dynamic> updatedRoutines = allRoutines.map((routine) {
+        if (routine['routineId'] == routineId) {
+          return {
+            'routineId': routine['routineId'],
+            'routineTitle': titleController.text,
+            'routineDescription': descriptionController.text,
+            'completedDate': routine['completedDate'],
+            'isRoutineDone': routine['isRoutineDone'],
+            'imagePath': routine['imagePath'],
+          };
+        } else {
+          return routine;
+        }
+      }).toList();
+
+      userSnapshot.reference.update({
+        'allRoutines': updatedRoutines,
+      });
+
+      _routineData.assignAll(updatedRoutines);
+      Get.back();
+      onInit();
+    } catch (e) {
+      print(e);
       Get.snackbar("Error", "Failed to save changes. Please try again.");
     }
   }
@@ -117,11 +186,12 @@ class RoutineController extends GetxController {
   Future<String> uploadImage(File image, String userId, String routineId) async {
     try {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      Reference ref = FirebaseStorage.instance.ref().child('images').child(userId).child(routineId).child(fileName);
+      Reference ref = FirebaseStorage.instance.ref().child('images').child(userId).child(DateTime.now().toString().split(' ')[0]).child(fileName);
       await ref.putFile(image);
       var url = await ref.getDownloadURL();
       return url;
     } catch (e) {
+      print(e);
       return '';
     }
   }

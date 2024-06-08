@@ -15,6 +15,8 @@ class AppUtils {
   static const String userId = "USER_ID";
   static const String userName = "USER_NAME";
 
+  static const int normalPadding = 14;
+
   static List staticRoutineData = [
     RoutineStaticData(name: "Cleanser", desc: "Cetaphil Gentle Skin Cleanser"),
     RoutineStaticData(name: "Toner", desc: "Thayers Witch Hazel Toner"),

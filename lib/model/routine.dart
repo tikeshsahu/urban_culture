@@ -48,12 +48,16 @@ class Routine {
 
 class RoutineItem {
   final String routineId;
+  final String routineTitle;
+  final String routineDescription;
   final String completedDate;
   final bool isRoutineDone;
   final String imagePath;
 
   RoutineItem({
     required this.routineId,
+    required this.routineTitle,
+    required this.routineDescription,
     required this.completedDate,
     required this.isRoutineDone,
     required this.imagePath,
@@ -61,6 +65,8 @@ class RoutineItem {
 
   factory RoutineItem.fromJson(Map<String, dynamic> json) => RoutineItem(
         routineId: json['routineId'],
+        routineTitle: json['routineTitle'],
+        routineDescription: json['routineDescription'],
         completedDate: json['completedDate'],
         isRoutineDone: json['isRoutineDone'],
         imagePath: json['imagePath'],
@@ -68,14 +74,20 @@ class RoutineItem {
 
   Map<String, dynamic> toJson() => {
         'routineId': routineId,
+        'routineTitle': routineTitle,
+        'routineDescription': routineDescription,
         'completedDate': completedDate,
         'isRoutineDone': isRoutineDone,
         'imagePath': imagePath,
       };
 
-  factory RoutineItem.createNew({required String routineId, required String completedDate, required bool isRoutineDone, required String imagePath}) {
+  factory RoutineItem.createNew({required String routineId, 
+  required routineTitle, required routineDescription, 
+  required String completedDate, required bool isRoutineDone, required String imagePath}) {
     return RoutineItem(
       routineId: routineId,
+      routineTitle: routineTitle,
+      routineDescription: routineDescription,
       completedDate: completedDate,
       isRoutineDone: isRoutineDone,
       imagePath: imagePath,

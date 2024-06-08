@@ -95,14 +95,17 @@ class AuthController extends GetxController {
       );
 
       UserCredential userCredential = await auth.signInWithCredential(credential);
-      String userId = userCredential.user!.uid;
+      String userId = userCredential.user!.uid; 
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
 
       if (!userSnapshot.exists) {
         List<RoutineItem> initialRoutines = List.generate(
+            // length
             5,
             (index) => RoutineItem.createNew(
-                  routineId: 'routine_${index + 1}',
+                  routineId: 'r_${index + 1}',
+                  routineTitle: "Routine ${index + 1}",
+                  routineDescription: "Enter description",
                   completedDate: '',
                   isRoutineDone: false,
                   imagePath: '',

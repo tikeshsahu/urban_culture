@@ -50,7 +50,6 @@ class StreaksScreen extends StatelessWidget {
                       )),
                       const SizedBox(height: 20),
                       Container(
-                          // height: size.height * 0.2,
                           width: size.width,
                           decoration: BoxDecoration(
                             color: const Color(0xffF2E8EB),

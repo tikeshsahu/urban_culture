@@ -46,6 +46,6 @@ class StreaksController extends GetxController {
   }
 
   bool hasCompletedFiveRoutines(Map<String, dynamic> completedRoutines, DateTime date, DateFormat formatter) {
-    return completedRoutines[formatter.format(date)]?.length == 5;
+    return completedRoutines[formatter.format(date)].length == 5;
   }
 }
